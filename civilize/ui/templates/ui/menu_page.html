@@ -1,0 +1,15 @@
+{% extends "lbrc/page.html" %}
+{% import "lbrc/errors.html" as errors %}
+
+{% block page_content %}
+  <nav>
+    <menu class="container">
+      <li>
+        <a href="{{url_for('ui.index')}}">Home</a>
+      </li>
+    </menu>
+  </nav>
+
+  {% block menu_page_content %}{% endblock %}
+{% endblock %}
+
