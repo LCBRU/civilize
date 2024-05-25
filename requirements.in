@@ -1,0 +1,7 @@
+-e git+https://github.com/LCBRU/lbrc_flask.git@main#egg=lbrc_flask
+Flask
+python-dotenv
+sqlalchemy
+pymysql
+flask-security-too[fsqla,common]
+cachetools

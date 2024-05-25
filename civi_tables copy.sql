@@ -79,7 +79,9 @@ CREATE TABLE `civicrm_acl_cache` (
   `modified_date` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `index_acl_id` (`acl_id`),
-  KEY `FK_civicrm_acl_cache_contact_id` (`contact_id`)
+  KEY `FK_civicrm_acl_cache_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_acl_cache_acl_id` FOREIGN KEY (`acl_id`) REFERENCES `civicrm_acl` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_acl_cache_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_acl_contact_cache`;
@@ -90,7 +92,9 @@ CREATE TABLE `civicrm_acl_contact_cache` (
   `operation` varchar(8) NOT NULL COMMENT 'What operation does this user have permission on?',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_user_contact_operation` (`user_id`,`contact_id`,`operation`),
-  KEY `FK_civicrm_acl_contact_cache_contact_id` (`contact_id`)
+  KEY `FK_civicrm_acl_contact_cache_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_acl_contact_cache_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_acl_contact_cache_user_id` FOREIGN KEY (`user_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_acl_entity_role`;
@@ -119,7 +123,9 @@ CREATE TABLE `civicrm_action_log` (
   `reference_date` date DEFAULT NULL COMMENT 'Stores the date from the entity which triggered this reminder action (e.g. membership.end_date for most membership renewal reminders)',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_action_log_contact_id` (`contact_id`),
-  KEY `FK_civicrm_action_log_action_schedule_id` (`action_schedule_id`)
+  KEY `FK_civicrm_action_log_action_schedule_id` (`action_schedule_id`),
+  CONSTRAINT `FK_civicrm_action_log_action_schedule_id` FOREIGN KEY (`action_schedule_id`) REFERENCES `civicrm_action_schedule` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_action_log_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_action_mapping`;
@@ -181,7 +187,11 @@ CREATE TABLE `civicrm_action_schedule` (
   KEY `FK_civicrm_action_schedule_group_id` (`group_id`),
   KEY `FK_civicrm_action_schedule_msg_template_id` (`msg_template_id`),
   KEY `FK_civicrm_action_schedule_sms_provider_id` (`sms_provider_id`),
-  KEY `FK_civicrm_action_schedule_sms_template_id` (`sms_template_id`)
+  KEY `FK_civicrm_action_schedule_sms_template_id` (`sms_template_id`),
+  CONSTRAINT `FK_civicrm_action_schedule_group_id` FOREIGN KEY (`group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_action_schedule_msg_template_id` FOREIGN KEY (`msg_template_id`) REFERENCES `civicrm_msg_template` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_action_schedule_sms_provider_id` FOREIGN KEY (`sms_provider_id`) REFERENCES `civicrm_sms_provider` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_action_schedule_sms_template_id` FOREIGN KEY (`sms_template_id`) REFERENCES `civicrm_msg_template` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_activity`;
@@ -222,7 +232,12 @@ CREATE TABLE `civicrm_activity` (
   KEY `FK_civicrm_activity_relationship_id` (`relationship_id`),
   KEY `FK_civicrm_activity_original_id` (`original_id`),
   KEY `FK_civicrm_activity_campaign_id` (`campaign_id`),
-  KEY `civicrm_activity_is_deleted_IDX` (`is_deleted`,`activity_type_id`) USING BTREE
+  KEY `civicrm_activity_is_deleted_IDX` (`is_deleted`,`activity_type_id`) USING BTREE,
+  CONSTRAINT `FK_civicrm_activity_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_activity_original_id` FOREIGN KEY (`original_id`) REFERENCES `civicrm_activity` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_activity_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `civicrm_activity` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_activity_phone_id` FOREIGN KEY (`phone_id`) REFERENCES `civicrm_phone` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_activity_relationship_id` FOREIGN KEY (`relationship_id`) REFERENCES `civicrm_relationship` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_activity_contact`;
@@ -234,7 +249,9 @@ CREATE TABLE `civicrm_activity_contact` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_activity_contact` (`contact_id`,`activity_id`,`record_type_id`),
   KEY `FK_civicrm_activity_contact_activity_id` (`activity_id`),
-  KEY `index_record_type` (`activity_id`,`record_type_id`)
+  KEY `index_record_type` (`activity_id`,`record_type_id`),
+  CONSTRAINT `FK_civicrm_activity_contact_activity_id` FOREIGN KEY (`activity_id`) REFERENCES `civicrm_activity` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_activity_contact_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_address`;
@@ -278,7 +295,12 @@ CREATE TABLE `civicrm_address` (
   KEY `FK_civicrm_address_county_id` (`county_id`),
   KEY `FK_civicrm_address_state_province_id` (`state_province_id`),
   KEY `FK_civicrm_address_country_id` (`country_id`),
-  KEY `FK_civicrm_address_master_id` (`master_id`)
+  KEY `FK_civicrm_address_master_id` (`master_id`),
+  CONSTRAINT `FK_civicrm_address_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_address_country_id` FOREIGN KEY (`country_id`) REFERENCES `civicrm_country` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_address_county_id` FOREIGN KEY (`county_id`) REFERENCES `civicrm_county` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_address_master_id` FOREIGN KEY (`master_id`) REFERENCES `civicrm_address` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_address_state_province_id` FOREIGN KEY (`state_province_id`) REFERENCES `civicrm_state_province` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_address_format`;
@@ -311,7 +333,10 @@ CREATE TABLE `civicrm_batch` (
   UNIQUE KEY `UI_name` (`name`),
   KEY `FK_civicrm_batch_created_id` (`created_id`),
   KEY `FK_civicrm_batch_modified_id` (`modified_id`),
-  KEY `FK_civicrm_batch_saved_search_id` (`saved_search_id`)
+  KEY `FK_civicrm_batch_saved_search_id` (`saved_search_id`),
+  CONSTRAINT `FK_civicrm_batch_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_batch_modified_id` FOREIGN KEY (`modified_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_batch_saved_search_id` FOREIGN KEY (`saved_search_id`) REFERENCES `civicrm_saved_search` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_cache`;
@@ -325,7 +350,8 @@ CREATE TABLE `civicrm_cache` (
   `expired_date` datetime DEFAULT NULL COMMENT 'When should the cache item expire',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_group_path_date` (`group_name`,`path`,`created_date`),
-  KEY `FK_civicrm_cache_component_id` (`component_id`)
+  KEY `FK_civicrm_cache_component_id` (`component_id`),
+  CONSTRAINT `FK_civicrm_cache_component_id` FOREIGN KEY (`component_id`) REFERENCES `civicrm_component` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_campaign`;
@@ -353,7 +379,10 @@ CREATE TABLE `civicrm_campaign` (
   KEY `UI_campaign_status_id` (`status_id`),
   KEY `FK_civicrm_campaign_parent_id` (`parent_id`),
   KEY `FK_civicrm_campaign_created_id` (`created_id`),
-  KEY `FK_civicrm_campaign_last_modified_id` (`last_modified_id`)
+  KEY `FK_civicrm_campaign_last_modified_id` (`last_modified_id`),
+  CONSTRAINT `FK_civicrm_campaign_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_campaign_last_modified_id` FOREIGN KEY (`last_modified_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_campaign_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_campaign_group`;
@@ -364,7 +393,8 @@ CREATE TABLE `civicrm_campaign_group` (
   `entity_table` varchar(64) DEFAULT NULL COMMENT 'Name of table where item being referenced is stored.',
   `entity_id` int(10) unsigned DEFAULT NULL COMMENT 'Entity id of referenced table.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_campaign_group_campaign_id` (`campaign_id`)
+  KEY `FK_civicrm_campaign_group_campaign_id` (`campaign_id`),
+  CONSTRAINT `FK_civicrm_campaign_group_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_case`;
@@ -379,7 +409,8 @@ CREATE TABLE `civicrm_case` (
   `is_deleted` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `index_case_type_id` (`case_type_id`),
-  KEY `index_is_deleted` (`is_deleted`)
+  KEY `index_is_deleted` (`is_deleted`),
+  CONSTRAINT `FK_civicrm_case_case_type_id` FOREIGN KEY (`case_type_id`) REFERENCES `civicrm_case_type` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_case_activity`;
@@ -389,7 +420,9 @@ CREATE TABLE `civicrm_case_activity` (
   `activity_id` int(10) unsigned NOT NULL COMMENT 'Activity ID of case-activity association.',
   PRIMARY KEY (`id`),
   KEY `UI_case_activity_id` (`case_id`,`activity_id`),
-  KEY `FK_civicrm_case_activity_activity_id` (`activity_id`)
+  KEY `FK_civicrm_case_activity_activity_id` (`activity_id`),
+  CONSTRAINT `FK_civicrm_case_activity_activity_id` FOREIGN KEY (`activity_id`) REFERENCES `civicrm_activity` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_case_activity_case_id` FOREIGN KEY (`case_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_case_contact`;
@@ -399,7 +432,9 @@ CREATE TABLE `civicrm_case_contact` (
   `contact_id` int(10) unsigned NOT NULL COMMENT 'Contact ID of contact record given case belongs to.',
   PRIMARY KEY (`id`),
   KEY `UI_case_contact_id` (`case_id`,`contact_id`),
-  KEY `FK_civicrm_case_contact_contact_id` (`contact_id`)
+  KEY `FK_civicrm_case_contact_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_case_contact_case_id` FOREIGN KEY (`case_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_case_contact_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_case_type`;
@@ -498,7 +533,9 @@ CREATE TABLE `civicrm_contact` (
   KEY `index_is_deleted_sort_name` (`is_deleted`,`sort_name`,`id`),
   KEY `dedupe_index_birth_date` (`birth_date`),
   KEY `index_communication_style_id` (`communication_style_id`),
-  KEY `index_image_URL_128` (`image_URL`(128))
+  KEY `index_image_URL_128` (`image_URL`(128)),
+  CONSTRAINT `FK_civicrm_contact_employer_id` FOREIGN KEY (`employer_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contact_primary_contact_id` FOREIGN KEY (`primary_contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_contact_type`;
@@ -513,7 +550,8 @@ CREATE TABLE `civicrm_contact_type` (
   `is_reserved` tinyint(4) DEFAULT NULL COMMENT 'Is this contact type a predefined system type',
   PRIMARY KEY (`id`),
   UNIQUE KEY `contact_type` (`name`),
-  KEY `FK_civicrm_contact_type_parent_id` (`parent_id`)
+  KEY `FK_civicrm_contact_type_parent_id` (`parent_id`),
+  CONSTRAINT `FK_civicrm_contact_type_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `civicrm_contact_type` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_contribution`;
@@ -562,7 +600,13 @@ CREATE TABLE `civicrm_contribution` (
   KEY `FK_civicrm_contribution_financial_type_id` (`financial_type_id`),
   KEY `index_creditnote_id` (`creditnote_id`),
   KEY `index_source` (`source`),
-  KEY `index_total_amount_receive_date` (`total_amount`,`receive_date`)
+  KEY `index_total_amount_receive_date` (`total_amount`,`receive_date`),
+  CONSTRAINT `FK_civicrm_contribution_address_id` FOREIGN KEY (`address_id`) REFERENCES `civicrm_address` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_contribution_contribution_page_id` FOREIGN KEY (`contribution_page_id`) REFERENCES `civicrm_contribution_page` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_contribution_recur_id` FOREIGN KEY (`contribution_recur_id`) REFERENCES `civicrm_contribution_recur` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_contribution_page`;
@@ -615,7 +659,10 @@ CREATE TABLE `civicrm_contribution_page` (
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_contribution_page_created_id` (`created_id`),
   KEY `FK_civicrm_contribution_page_campaign_id` (`campaign_id`),
-  KEY `FK_civicrm_contribution_page_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_contribution_page_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_contribution_page_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_page_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_page_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_contribution_product`;
@@ -632,7 +679,9 @@ CREATE TABLE `civicrm_contribution_product` (
   `financial_type_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to Financial Type.',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_contribution_product_contribution_id` (`contribution_id`),
-  KEY `FK_civicrm_contribution_product_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_contribution_product_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_contribution_product_contribution_id` FOREIGN KEY (`contribution_id`) REFERENCES `civicrm_contribution` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_contribution_product_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_contribution_recur`;
@@ -674,7 +723,12 @@ CREATE TABLE `civicrm_contribution_recur` (
   KEY `FK_civicrm_contribution_recur_payment_processor_id` (`payment_processor_id`),
   KEY `FK_civicrm_contribution_recur_campaign_id` (`campaign_id`),
   KEY `FK_civicrm_contribution_recur_financial_type_id` (`financial_type_id`),
-  KEY `FK_civicrm_contribution_recur_payment_token_id` (`payment_token_id`)
+  KEY `FK_civicrm_contribution_recur_payment_token_id` (`payment_token_id`),
+  CONSTRAINT `FK_civicrm_contribution_recur_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_recur_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_contribution_recur_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_recur_payment_processor_id` FOREIGN KEY (`payment_processor_id`) REFERENCES `civicrm_payment_processor` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_contribution_recur_payment_token_id` FOREIGN KEY (`payment_token_id`) REFERENCES `civicrm_payment_token` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_contribution_soft`;
@@ -692,7 +746,10 @@ CREATE TABLE `civicrm_contribution_soft` (
   PRIMARY KEY (`id`),
   KEY `index_id` (`pcp_id`),
   KEY `FK_civicrm_contribution_soft_contribution_id` (`contribution_id`),
-  KEY `FK_civicrm_contribution_soft_contact_id` (`contact_id`)
+  KEY `FK_civicrm_contribution_soft_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_contribution_soft_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_contribution_soft_contribution_id` FOREIGN KEY (`contribution_id`) REFERENCES `civicrm_contribution` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_contribution_soft_pcp_id` FOREIGN KEY (`pcp_id`) REFERENCES `civicrm_pcp` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_contribution_widget`;
@@ -715,7 +772,8 @@ CREATE TABLE `civicrm_contribution_widget` (
   `color_about_link` varchar(10) DEFAULT NULL,
   `color_homepage_link` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_contribution_widget_contribution_page_id` (`contribution_page_id`)
+  KEY `FK_civicrm_contribution_widget_contribution_page_id` (`contribution_page_id`),
+  CONSTRAINT `FK_civicrm_contribution_widget_contribution_page_id` FOREIGN KEY (`contribution_page_id`) REFERENCES `civicrm_contribution_page` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_country`;
@@ -732,7 +790,9 @@ CREATE TABLE `civicrm_country` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_name_iso_code` (`name`,`iso_code`),
   KEY `FK_civicrm_country_address_format_id` (`address_format_id`),
-  KEY `FK_civicrm_country_region_id` (`region_id`)
+  KEY `FK_civicrm_country_region_id` (`region_id`),
+  CONSTRAINT `FK_civicrm_country_address_format_id` FOREIGN KEY (`address_format_id`) REFERENCES `civicrm_address_format` (`id`),
+  CONSTRAINT `FK_civicrm_country_region_id` FOREIGN KEY (`region_id`) REFERENCES `civicrm_worldregion` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_county`;
@@ -743,7 +803,8 @@ CREATE TABLE `civicrm_county` (
   `state_province_id` int(10) unsigned NOT NULL COMMENT 'ID of State / Province that County belongs',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_name_state_id` (`name`,`state_province_id`),
-  KEY `FK_civicrm_county_state_province_id` (`state_province_id`)
+  KEY `FK_civicrm_county_state_province_id` (`state_province_id`),
+  CONSTRAINT `FK_civicrm_county_state_province_id` FOREIGN KEY (`state_province_id`) REFERENCES `civicrm_state_province` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_currency`;
@@ -794,7 +855,8 @@ CREATE TABLE `civicrm_custom_field` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_label_custom_group_id` (`label`,`custom_group_id`),
   UNIQUE KEY `UI_name_custom_group_id` (`name`,`custom_group_id`),
-  KEY `FK_civicrm_custom_field_custom_group_id` (`custom_group_id`)
+  KEY `FK_civicrm_custom_field_custom_group_id` (`custom_group_id`),
+  CONSTRAINT `FK_civicrm_custom_field_custom_group_id` FOREIGN KEY (`custom_group_id`) REFERENCES `civicrm_custom_group` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_custom_group`;
@@ -823,7 +885,8 @@ CREATE TABLE `civicrm_custom_group` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_title_extends` (`title`,`extends`),
   UNIQUE KEY `UI_name_extends` (`name`,`extends`),
-  KEY `FK_civicrm_custom_group_created_id` (`created_id`)
+  KEY `FK_civicrm_custom_group_created_id` (`created_id`),
+  CONSTRAINT `FK_civicrm_custom_group_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_cxn`;
@@ -860,7 +923,8 @@ CREATE TABLE `civicrm_dashboard` (
   `is_reserved` tinyint(4) DEFAULT 0 COMMENT 'Is this dashlet reserved?',
   `cache_minutes` int(10) unsigned NOT NULL DEFAULT 60 COMMENT 'Number of minutes to cache dashlet content in browser localStorage.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_dashboard_domain_id` (`domain_id`)
+  KEY `FK_civicrm_dashboard_domain_id` (`domain_id`),
+  CONSTRAINT `FK_civicrm_dashboard_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_dashboard_contact`;
@@ -875,7 +939,9 @@ CREATE TABLE `civicrm_dashboard_contact` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_dashboard_id_contact_id` (`dashboard_id`,`contact_id`),
   KEY `FK_civicrm_dashboard_contact_dashboard_id` (`dashboard_id`),
-  KEY `FK_civicrm_dashboard_contact_contact_id` (`contact_id`)
+  KEY `FK_civicrm_dashboard_contact_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_dashboard_contact_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_dashboard_contact_dashboard_id` FOREIGN KEY (`dashboard_id`) REFERENCES `civicrm_dashboard` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_dedupe_exception`;
@@ -886,7 +952,9 @@ CREATE TABLE `civicrm_dedupe_exception` (
   `contact_id2` int(10) unsigned DEFAULT NULL COMMENT 'FK to Contact ID',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_contact_id1_contact_id2` (`contact_id1`,`contact_id2`),
-  KEY `FK_civicrm_dedupe_exception_contact_id2` (`contact_id2`)
+  KEY `FK_civicrm_dedupe_exception_contact_id2` (`contact_id2`),
+  CONSTRAINT `FK_civicrm_dedupe_exception_contact_id1` FOREIGN KEY (`contact_id1`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_dedupe_exception_contact_id2` FOREIGN KEY (`contact_id2`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_dedupe_rule`;
@@ -899,7 +967,8 @@ CREATE TABLE `civicrm_dedupe_rule` (
   `rule_length` int(10) unsigned DEFAULT NULL COMMENT 'The lenght of the matching substring',
   `rule_weight` int(11) NOT NULL COMMENT 'The weight of the rule',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_dedupe_rule_dedupe_rule_group_id` (`dedupe_rule_group_id`)
+  KEY `FK_civicrm_dedupe_rule_dedupe_rule_group_id` (`dedupe_rule_group_id`),
+  CONSTRAINT `FK_civicrm_dedupe_rule_dedupe_rule_group_id` FOREIGN KEY (`dedupe_rule_group_id`) REFERENCES `civicrm_dedupe_rule_group` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_dedupe_rule_group`;
@@ -927,7 +996,8 @@ CREATE TABLE `civicrm_discount` (
   PRIMARY KEY (`id`),
   KEY `index_entity` (`entity_table`,`entity_id`),
   KEY `index_entity_option_id` (`entity_table`,`entity_id`,`price_set_id`),
-  KEY `FK_civicrm_discount_price_set_id` (`price_set_id`)
+  KEY `FK_civicrm_discount_price_set_id` (`price_set_id`),
+  CONSTRAINT `FK_civicrm_discount_price_set_id` FOREIGN KEY (`price_set_id`) REFERENCES `civicrm_price_set` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_domain`;
@@ -942,7 +1012,8 @@ CREATE TABLE `civicrm_domain` (
   `contact_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to Contact ID. This is specifically not an FK to avoid circular constraints',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_name` (`name`),
-  KEY `FK_civicrm_domain_contact_id` (`contact_id`)
+  KEY `FK_civicrm_domain_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_domain_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_email`;
@@ -965,7 +1036,8 @@ CREATE TABLE `civicrm_email` (
   KEY `UI_email` (`email`),
   KEY `index_is_primary` (`is_primary`),
   KEY `index_is_billing` (`is_billing`),
-  KEY `FK_civicrm_email_contact_id` (`contact_id`)
+  KEY `FK_civicrm_email_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_email_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_entity_batch`;
@@ -977,7 +1049,8 @@ CREATE TABLE `civicrm_entity_batch` (
   `batch_id` int(10) unsigned NOT NULL COMMENT 'FK to civicrm_batch',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_batch_entity` (`batch_id`,`entity_id`,`entity_table`),
-  KEY `index_entity` (`entity_table`,`entity_id`)
+  KEY `index_entity` (`entity_table`,`entity_id`),
+  CONSTRAINT `FK_civicrm_entity_batch_batch_id` FOREIGN KEY (`batch_id`) REFERENCES `civicrm_batch` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_entity_file`;
@@ -990,7 +1063,8 @@ CREATE TABLE `civicrm_entity_file` (
   PRIMARY KEY (`id`),
   KEY `index_entity` (`entity_table`,`entity_id`),
   KEY `index_entity_file_id` (`entity_table`,`entity_id`,`file_id`),
-  KEY `FK_civicrm_entity_file_file_id` (`file_id`)
+  KEY `FK_civicrm_entity_file_file_id` (`file_id`),
+  CONSTRAINT `FK_civicrm_entity_file_file_id` FOREIGN KEY (`file_id`) REFERENCES `civicrm_file` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_entity_financial_account`;
@@ -1002,7 +1076,8 @@ CREATE TABLE `civicrm_entity_financial_account` (
   `account_relationship` int(10) unsigned NOT NULL COMMENT 'FK to a new civicrm_option_value (account_relationship)',
   `financial_account_id` int(10) unsigned NOT NULL COMMENT 'FK to the financial_account_id',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_entity_financial_account_financial_account_id` (`financial_account_id`)
+  KEY `FK_civicrm_entity_financial_account_financial_account_id` (`financial_account_id`),
+  CONSTRAINT `FK_civicrm_entity_financial_account_financial_account_id` FOREIGN KEY (`financial_account_id`) REFERENCES `civicrm_financial_account` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_entity_financial_trxn`;
@@ -1016,7 +1091,8 @@ CREATE TABLE `civicrm_entity_financial_trxn` (
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_entity_financial_trxn_financial_trxn_id` (`financial_trxn_id`),
   KEY `UI_entity_financial_trxn_entity_table` (`entity_table`),
-  KEY `UI_entity_financial_trxn_entity_id` (`entity_id`)
+  KEY `UI_entity_financial_trxn_entity_id` (`entity_id`),
+  CONSTRAINT `FK_civicrm_entity_financial_trxn_financial_trxn_id` FOREIGN KEY (`financial_trxn_id`) REFERENCES `civicrm_financial_trxn` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_entity_tag`;
@@ -1028,7 +1104,8 @@ CREATE TABLE `civicrm_entity_tag` (
   `tag_id` int(10) unsigned NOT NULL COMMENT 'FK to civicrm_tag',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_entity_id_entity_table_tag_id` (`entity_id`,`entity_table`,`tag_id`),
-  KEY `FK_civicrm_entity_tag_tag_id` (`tag_id`)
+  KEY `FK_civicrm_entity_tag_tag_id` (`tag_id`),
+  CONSTRAINT `FK_civicrm_entity_tag_tag_id` FOREIGN KEY (`tag_id`) REFERENCES `civicrm_tag` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_event`;
@@ -1110,7 +1187,11 @@ CREATE TABLE `civicrm_event` (
   KEY `FK_civicrm_event_loc_block_id` (`loc_block_id`),
   KEY `FK_civicrm_event_created_id` (`created_id`),
   KEY `FK_civicrm_event_campaign_id` (`campaign_id`),
-  KEY `FK_civicrm_event_dedupe_rule_group_id` (`dedupe_rule_group_id`)
+  KEY `FK_civicrm_event_dedupe_rule_group_id` (`dedupe_rule_group_id`),
+  CONSTRAINT `FK_civicrm_event_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_event_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_event_dedupe_rule_group_id` FOREIGN KEY (`dedupe_rule_group_id`) REFERENCES `civicrm_dedupe_rule_group` (`id`),
+  CONSTRAINT `FK_civicrm_event_loc_block_id` FOREIGN KEY (`loc_block_id`) REFERENCES `civicrm_loc_block` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_event_carts`;
@@ -1120,7 +1201,8 @@ CREATE TABLE `civicrm_event_carts` (
   `user_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to civicrm_contact who created this cart',
   `completed` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_event_carts_user_id` (`user_id`)
+  KEY `FK_civicrm_event_carts_user_id` (`user_id`),
+  CONSTRAINT `FK_civicrm_event_carts_user_id` FOREIGN KEY (`user_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_events_in_carts`;
@@ -1131,7 +1213,9 @@ CREATE TABLE `civicrm_events_in_carts` (
   `event_cart_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to Event Cart ID',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_events_in_carts_event_id` (`event_id`),
-  KEY `FK_civicrm_events_in_carts_event_cart_id` (`event_cart_id`)
+  KEY `FK_civicrm_events_in_carts_event_cart_id` (`event_cart_id`),
+  CONSTRAINT `FK_civicrm_events_in_carts_event_cart_id` FOREIGN KEY (`event_cart_id`) REFERENCES `civicrm_event_carts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_events_in_carts_event_id` FOREIGN KEY (`event_id`) REFERENCES `civicrm_event` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_extension`;
@@ -1186,7 +1270,9 @@ CREATE TABLE `civicrm_financial_account` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_name` (`name`),
   KEY `FK_civicrm_financial_account_parent_id` (`parent_id`),
-  KEY `FK_civicrm_financial_account_contact_id` (`contact_id`)
+  KEY `FK_civicrm_financial_account_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_financial_account_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_financial_account_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `civicrm_financial_account` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_financial_item`;
@@ -1208,7 +1294,9 @@ CREATE TABLE `civicrm_financial_item` (
   KEY `IX_transaction_date` (`transaction_date`),
   KEY `FK_civicrm_financial_item_financial_account_id` (`financial_account_id`),
   KEY `FK_civicrm_financial_item_contact_id` (`contact_id`),
-  KEY `index_entity_id_entity_table` (`entity_id`,`entity_table`)
+  KEY `index_entity_id_entity_table` (`entity_id`,`entity_table`),
+  CONSTRAINT `FK_civicrm_financial_item_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_financial_item_financial_account_id` FOREIGN KEY (`financial_account_id`) REFERENCES `civicrm_financial_account` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_financial_trxn`;
@@ -1235,7 +1323,10 @@ CREATE TABLE `civicrm_financial_trxn` (
   KEY `FK_civicrm_financial_trxn_to_financial_account_id` (`to_financial_account_id`),
   KEY `FK_civicrm_financial_trxn_from_financial_account_id` (`from_financial_account_id`),
   KEY `FK_civicrm_financial_trxn_payment_processor_id` (`payment_processor_id`),
-  KEY `index_trxn_id` (`trxn_id`)
+  KEY `index_trxn_id` (`trxn_id`),
+  CONSTRAINT `FK_civicrm_financial_trxn_from_financial_account_id` FOREIGN KEY (`from_financial_account_id`) REFERENCES `civicrm_financial_account` (`id`),
+  CONSTRAINT `FK_civicrm_financial_trxn_payment_processor_id` FOREIGN KEY (`payment_processor_id`) REFERENCES `civicrm_payment_processor` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_financial_trxn_to_financial_account_id` FOREIGN KEY (`to_financial_account_id`) REFERENCES `civicrm_financial_account` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_financial_type`;
@@ -1273,7 +1364,9 @@ CREATE TABLE `civicrm_grant` (
   KEY `index_grant_type_id` (`grant_type_id`),
   KEY `index_status_id` (`status_id`),
   KEY `FK_civicrm_grant_contact_id` (`contact_id`),
-  KEY `FK_civicrm_grant_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_grant_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_grant_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_grant_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_group`;
@@ -1305,7 +1398,10 @@ CREATE TABLE `civicrm_group` (
   KEY `index_group_type` (`group_type`),
   KEY `FK_civicrm_group_saved_search_id` (`saved_search_id`),
   KEY `FK_civicrm_group_created_id` (`created_id`),
-  KEY `FK_civicrm_group_modified_id` (`modified_id`)
+  KEY `FK_civicrm_group_modified_id` (`modified_id`),
+  CONSTRAINT `FK_civicrm_group_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_group_modified_id` FOREIGN KEY (`modified_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_group_saved_search_id` FOREIGN KEY (`saved_search_id`) REFERENCES `civicrm_saved_search` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_group_contact`;
@@ -1321,7 +1417,11 @@ CREATE TABLE `civicrm_group_contact` (
   UNIQUE KEY `UI_contact_group` (`contact_id`,`group_id`),
   KEY `FK_civicrm_group_contact_group_id` (`group_id`),
   KEY `FK_civicrm_group_contact_location_id` (`location_id`),
-  KEY `FK_civicrm_group_contact_email_id` (`email_id`)
+  KEY `FK_civicrm_group_contact_email_id` (`email_id`),
+  CONSTRAINT `FK_civicrm_group_contact_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_group_contact_email_id` FOREIGN KEY (`email_id`) REFERENCES `civicrm_email` (`id`),
+  CONSTRAINT `FK_civicrm_group_contact_group_id` FOREIGN KEY (`group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_group_contact_location_id` FOREIGN KEY (`location_id`) REFERENCES `civicrm_loc_block` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_group_contact_cache`;
@@ -1332,7 +1432,9 @@ CREATE TABLE `civicrm_group_contact_cache` (
   `contact_id` int(10) unsigned NOT NULL COMMENT 'FK to civicrm_contact',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_contact_group` (`contact_id`,`group_id`),
-  KEY `FK_civicrm_group_contact_cache_group_id` (`group_id`)
+  KEY `FK_civicrm_group_contact_cache_group_id` (`group_id`),
+  CONSTRAINT `FK_civicrm_group_contact_cache_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_group_contact_cache_group_id` FOREIGN KEY (`group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_group_nesting`;
@@ -1343,7 +1445,9 @@ CREATE TABLE `civicrm_group_nesting` (
   `parent_group_id` int(10) unsigned NOT NULL COMMENT 'ID of the parent group',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_group_nesting_child_group_id` (`child_group_id`),
-  KEY `FK_civicrm_group_nesting_parent_group_id` (`parent_group_id`)
+  KEY `FK_civicrm_group_nesting_parent_group_id` (`parent_group_id`),
+  CONSTRAINT `FK_civicrm_group_nesting_child_group_id` FOREIGN KEY (`child_group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_group_nesting_parent_group_id` FOREIGN KEY (`parent_group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_group_organization`;
@@ -1354,7 +1458,9 @@ CREATE TABLE `civicrm_group_organization` (
   `organization_id` int(10) unsigned NOT NULL COMMENT 'ID of the Organization Contact',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_group_organization` (`group_id`,`organization_id`),
-  KEY `FK_civicrm_group_organization_organization_id` (`organization_id`)
+  KEY `FK_civicrm_group_organization_organization_id` (`organization_id`),
+  CONSTRAINT `FK_civicrm_group_organization_group_id` FOREIGN KEY (`group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_group_organization_organization_id` FOREIGN KEY (`organization_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_im`;
@@ -1372,7 +1478,8 @@ CREATE TABLE `civicrm_im` (
   KEY `UI_provider_id` (`provider_id`),
   KEY `index_is_primary` (`is_primary`),
   KEY `index_is_billing` (`is_billing`),
-  KEY `FK_civicrm_im_contact_id` (`contact_id`)
+  KEY `FK_civicrm_im_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_im_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_job`;
@@ -1390,8 +1497,9 @@ CREATE TABLE `civicrm_job` (
   `parameters` text DEFAULT NULL COMMENT 'List of parameters to the command.',
   `is_active` tinyint(4) DEFAULT NULL COMMENT 'Is this job active?',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_job_domain_id` (`domain_id`)
- );
+  KEY `FK_civicrm_job_domain_id` (`domain_id`),
+  CONSTRAINT `FK_civicrm_job_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`)
+);
 
 DROP TABLE IF EXISTS `civicrm_job_log`;
 
@@ -1405,7 +1513,8 @@ CREATE TABLE `civicrm_job_log` (
   `description` varchar(255) DEFAULT NULL COMMENT 'Title line of log entry',
   `data` text DEFAULT NULL COMMENT 'Potential extended data for specific job run (e.g. tracebacks).',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_job_log_domain_id` (`domain_id`)
+  KEY `FK_civicrm_job_log_domain_id` (`domain_id`),
+  CONSTRAINT `FK_civicrm_job_log_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_line_item`;
@@ -1431,7 +1540,11 @@ CREATE TABLE `civicrm_line_item` (
   KEY `FK_civicrm_line_item_price_field_value_id` (`price_field_value_id`),
   KEY `FK_civicrm_line_item_price_field_id` (`price_field_id`),
   KEY `FK_civicrm_line_item_financial_type_id` (`financial_type_id`),
-  KEY `FK_civicrm_contribution_id` (`contribution_id`)
+  KEY `FK_civicrm_contribution_id` (`contribution_id`),
+  CONSTRAINT `FK_civicrm_contribution_id` FOREIGN KEY (`contribution_id`) REFERENCES `civicrm_contribution` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_line_item_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_line_item_price_field_id` FOREIGN KEY (`price_field_id`) REFERENCES `civicrm_price_field` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_line_item_price_field_value_id` FOREIGN KEY (`price_field_value_id`) REFERENCES `civicrm_price_field_value` (`id`) ON DELETE NO ACTION
 );
 
 DROP TABLE IF EXISTS `civicrm_loc_block`;
@@ -1454,7 +1567,15 @@ CREATE TABLE `civicrm_loc_block` (
   KEY `FK_civicrm_loc_block_address_2_id` (`address_2_id`),
   KEY `FK_civicrm_loc_block_email_2_id` (`email_2_id`),
   KEY `FK_civicrm_loc_block_phone_2_id` (`phone_2_id`),
-  KEY `FK_civicrm_loc_block_im_2_id` (`im_2_id`)
+  KEY `FK_civicrm_loc_block_im_2_id` (`im_2_id`),
+  CONSTRAINT `FK_civicrm_loc_block_address_2_id` FOREIGN KEY (`address_2_id`) REFERENCES `civicrm_address` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_loc_block_address_id` FOREIGN KEY (`address_id`) REFERENCES `civicrm_address` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_loc_block_email_2_id` FOREIGN KEY (`email_2_id`) REFERENCES `civicrm_email` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_loc_block_email_id` FOREIGN KEY (`email_id`) REFERENCES `civicrm_email` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_loc_block_im_2_id` FOREIGN KEY (`im_2_id`) REFERENCES `civicrm_im` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_loc_block_im_id` FOREIGN KEY (`im_id`) REFERENCES `civicrm_im` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_loc_block_phone_2_id` FOREIGN KEY (`phone_2_id`) REFERENCES `civicrm_phone` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_loc_block_phone_id` FOREIGN KEY (`phone_id`) REFERENCES `civicrm_phone` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_location_type`;
@@ -1484,7 +1605,8 @@ CREATE TABLE `civicrm_log` (
   PRIMARY KEY (`id`),
   KEY `index_entity` (`entity_table`,`entity_id`),
   KEY `FK_civicrm_log_modified_id` (`modified_id`),
-  KEY `civicrm_log_entity_id_IDX` (`entity_id`,`entity_table`,`modified_date`) USING BTREE
+  KEY `civicrm_log_entity_id_IDX` (`entity_id`,`entity_table`,`modified_date`) USING BTREE,
+  CONSTRAINT `FK_civicrm_log_modified_id` FOREIGN KEY (`modified_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mail_settings`;
@@ -1505,7 +1627,8 @@ CREATE TABLE `civicrm_mail_settings` (
   `is_ssl` tinyint(4) DEFAULT NULL COMMENT 'whether to use SSL or not',
   `source` varchar(255) DEFAULT NULL COMMENT 'folder to poll from when using IMAP, path to poll from when using Maildir, etc.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mail_settings_domain_id` (`domain_id`)
+  KEY `FK_civicrm_mail_settings_domain_id` (`domain_id`),
+  CONSTRAINT `FK_civicrm_mail_settings_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing`;
@@ -1567,7 +1690,20 @@ CREATE TABLE `civicrm_mailing` (
   KEY `FK_civicrm_mailing_campaign_id` (`campaign_id`),
   KEY `FK_civicrm_mailing_sms_provider_id` (`sms_provider_id`),
   KEY `index_hash` (`hash`),
-  KEY `FK_civicrm_mailing_location_type_id` (`location_type_id`)
+  KEY `FK_civicrm_mailing_location_type_id` (`location_type_id`),
+  CONSTRAINT `FK_civicrm_mailing_approver_id` FOREIGN KEY (`approver_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_footer_id` FOREIGN KEY (`footer_id`) REFERENCES `civicrm_mailing_component` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_header_id` FOREIGN KEY (`header_id`) REFERENCES `civicrm_mailing_component` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_location_type_id` FOREIGN KEY (`location_type_id`) REFERENCES `civicrm_location_type` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_msg_template_id` FOREIGN KEY (`msg_template_id`) REFERENCES `civicrm_msg_template` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_optout_id` FOREIGN KEY (`optout_id`) REFERENCES `civicrm_mailing_component` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_reply_id` FOREIGN KEY (`reply_id`) REFERENCES `civicrm_mailing_component` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_scheduled_id` FOREIGN KEY (`scheduled_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_sms_provider_id` FOREIGN KEY (`sms_provider_id`) REFERENCES `civicrm_sms_provider` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_unsubscribe_id` FOREIGN KEY (`unsubscribe_id`) REFERENCES `civicrm_mailing_component` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_abtest`;
@@ -1588,7 +1724,8 @@ CREATE TABLE `civicrm_mailing_abtest` (
   `testing_criteria` varchar(32) DEFAULT NULL,
   `winner_criteria` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_abtest_created_id` (`created_id`)
+  KEY `FK_civicrm_mailing_abtest_created_id` (`created_id`),
+  CONSTRAINT `FK_civicrm_mailing_abtest_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_bounce_pattern`;
@@ -1598,7 +1735,8 @@ CREATE TABLE `civicrm_mailing_bounce_pattern` (
   `bounce_type_id` int(10) unsigned NOT NULL COMMENT 'Type of bounce',
   `pattern` varchar(255) DEFAULT NULL COMMENT 'A regexp to match a message to a bounce type',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_bounce_pattern_bounce_type_id` (`bounce_type_id`)
+  KEY `FK_civicrm_mailing_bounce_pattern_bounce_type_id` (`bounce_type_id`),
+  CONSTRAINT `FK_civicrm_mailing_bounce_pattern_bounce_type_id` FOREIGN KEY (`bounce_type_id`) REFERENCES `civicrm_mailing_bounce_type` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_bounce_type`;
@@ -1634,7 +1772,8 @@ CREATE TABLE `civicrm_mailing_event_bounce` (
   `bounce_reason` varchar(255) DEFAULT NULL COMMENT 'The reason the email bounced.',
   `time_stamp` datetime NOT NULL COMMENT 'When this bounce event occurred.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_event_bounce_event_queue_id` (`event_queue_id`)
+  KEY `FK_civicrm_mailing_event_bounce_event_queue_id` (`event_queue_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_bounce_event_queue_id` FOREIGN KEY (`event_queue_id`) REFERENCES `civicrm_mailing_event_queue` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_confirm`;
@@ -1644,7 +1783,8 @@ CREATE TABLE `civicrm_mailing_event_confirm` (
   `event_subscribe_id` int(10) unsigned NOT NULL COMMENT 'FK to civicrm_mailing_event_subscribe',
   `time_stamp` datetime NOT NULL COMMENT 'When this confirmation event occurred.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_event_confirm_event_subscribe_id` (`event_subscribe_id`)
+  KEY `FK_civicrm_mailing_event_confirm_event_subscribe_id` (`event_subscribe_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_confirm_event_subscribe_id` FOREIGN KEY (`event_subscribe_id`) REFERENCES `civicrm_mailing_event_subscribe` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_delivered`;
@@ -1654,7 +1794,8 @@ CREATE TABLE `civicrm_mailing_event_delivered` (
   `event_queue_id` int(10) unsigned NOT NULL COMMENT 'FK to EventQueue',
   `time_stamp` datetime NOT NULL COMMENT 'When this delivery event occurred.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_event_delivered_event_queue_id` (`event_queue_id`)
+  KEY `FK_civicrm_mailing_event_delivered_event_queue_id` (`event_queue_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_delivered_event_queue_id` FOREIGN KEY (`event_queue_id`) REFERENCES `civicrm_mailing_event_queue` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_forward`;
@@ -1666,7 +1807,9 @@ CREATE TABLE `civicrm_mailing_event_forward` (
   `time_stamp` datetime NOT NULL COMMENT 'When this forward event occurred.',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_mailing_event_forward_event_queue_id` (`event_queue_id`),
-  KEY `FK_civicrm_mailing_event_forward_dest_queue_id` (`dest_queue_id`)
+  KEY `FK_civicrm_mailing_event_forward_dest_queue_id` (`dest_queue_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_forward_dest_queue_id` FOREIGN KEY (`dest_queue_id`) REFERENCES `civicrm_mailing_event_queue` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_mailing_event_forward_event_queue_id` FOREIGN KEY (`event_queue_id`) REFERENCES `civicrm_mailing_event_queue` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_opened`;
@@ -1676,7 +1819,8 @@ CREATE TABLE `civicrm_mailing_event_opened` (
   `event_queue_id` int(10) unsigned NOT NULL COMMENT 'FK to EventQueue',
   `time_stamp` datetime NOT NULL COMMENT 'When this open event occurred.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_event_opened_event_queue_id` (`event_queue_id`)
+  KEY `FK_civicrm_mailing_event_opened_event_queue_id` (`event_queue_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_opened_event_queue_id` FOREIGN KEY (`event_queue_id`) REFERENCES `civicrm_mailing_event_queue` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_queue`;
@@ -1692,7 +1836,11 @@ CREATE TABLE `civicrm_mailing_event_queue` (
   KEY `FK_civicrm_mailing_event_queue_job_id` (`job_id`),
   KEY `FK_civicrm_mailing_event_queue_email_id` (`email_id`),
   KEY `FK_civicrm_mailing_event_queue_contact_id` (`contact_id`),
-  KEY `FK_civicrm_mailing_event_queue_phone_id` (`phone_id`)
+  KEY `FK_civicrm_mailing_event_queue_phone_id` (`phone_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_queue_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_mailing_event_queue_email_id` FOREIGN KEY (`email_id`) REFERENCES `civicrm_email` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION,
+  CONSTRAINT `FK_civicrm_mailing_event_queue_job_id` FOREIGN KEY (`job_id`) REFERENCES `civicrm_mailing_job` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_mailing_event_queue_phone_id` FOREIGN KEY (`phone_id`) REFERENCES `civicrm_phone` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_reply`;
@@ -1702,7 +1850,8 @@ CREATE TABLE `civicrm_mailing_event_reply` (
   `event_queue_id` int(10) unsigned NOT NULL COMMENT 'FK to EventQueue',
   `time_stamp` datetime NOT NULL COMMENT 'When this reply event occurred.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_event_reply_event_queue_id` (`event_queue_id`)
+  KEY `FK_civicrm_mailing_event_reply_event_queue_id` (`event_queue_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_reply_event_queue_id` FOREIGN KEY (`event_queue_id`) REFERENCES `civicrm_mailing_event_queue` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_subscribe`;
@@ -1715,7 +1864,9 @@ CREATE TABLE `civicrm_mailing_event_subscribe` (
   `time_stamp` datetime NOT NULL COMMENT 'When this subscription event occurred.',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_mailing_event_subscribe_group_id` (`group_id`),
-  KEY `FK_civicrm_mailing_event_subscribe_contact_id` (`contact_id`)
+  KEY `FK_civicrm_mailing_event_subscribe_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_subscribe_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_mailing_event_subscribe_group_id` FOREIGN KEY (`group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_trackable_url_open`;
@@ -1727,7 +1878,9 @@ CREATE TABLE `civicrm_mailing_event_trackable_url_open` (
   `time_stamp` datetime NOT NULL COMMENT 'When this trackable URL open occurred.',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_mailing_event_trackable_url_open_event_queue_id` (`event_queue_id`),
-  KEY `FK_civicrm_mailing_event_trackable_url_open_trackable_url_id` (`trackable_url_id`)
+  KEY `FK_civicrm_mailing_event_trackable_url_open_trackable_url_id` (`trackable_url_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_trackable_url_open_event_queue_id` FOREIGN KEY (`event_queue_id`) REFERENCES `civicrm_mailing_event_queue` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_mailing_event_trackable_url_open_trackable_url_id` FOREIGN KEY (`trackable_url_id`) REFERENCES `civicrm_mailing_trackable_url` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_event_unsubscribe`;
@@ -1738,7 +1891,8 @@ CREATE TABLE `civicrm_mailing_event_unsubscribe` (
   `org_unsubscribe` tinyint(4) NOT NULL COMMENT 'Unsubscribe at org- or group-level',
   `time_stamp` datetime NOT NULL COMMENT 'When this delivery event occurred.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_event_unsubscribe_event_queue_id` (`event_queue_id`)
+  KEY `FK_civicrm_mailing_event_unsubscribe_event_queue_id` (`event_queue_id`),
+  CONSTRAINT `FK_civicrm_mailing_event_unsubscribe_event_queue_id` FOREIGN KEY (`event_queue_id`) REFERENCES `civicrm_mailing_event_queue` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_group`;
@@ -1752,7 +1906,8 @@ CREATE TABLE `civicrm_mailing_group` (
   `search_id` int(11) DEFAULT NULL COMMENT 'The filtering search. custom search id or -1 for civicrm api search',
   `search_args` text DEFAULT NULL COMMENT 'The arguments to be sent to the search function',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_group_mailing_id` (`mailing_id`)
+  KEY `FK_civicrm_mailing_group_mailing_id` (`mailing_id`),
+  CONSTRAINT `FK_civicrm_mailing_group_mailing_id` FOREIGN KEY (`mailing_id`) REFERENCES `civicrm_mailing` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_job`;
@@ -1771,7 +1926,9 @@ CREATE TABLE `civicrm_mailing_job` (
   `job_limit` int(11) DEFAULT 0 COMMENT 'Queue size limit for each child job',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_mailing_job_mailing_id` (`mailing_id`),
-  KEY `FK_civicrm_mailing_job_parent_id` (`parent_id`)
+  KEY `FK_civicrm_mailing_job_parent_id` (`parent_id`),
+  CONSTRAINT `FK_civicrm_mailing_job_mailing_id` FOREIGN KEY (`mailing_id`) REFERENCES `civicrm_mailing` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_mailing_job_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `civicrm_mailing_job` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_recipients`;
@@ -1786,7 +1943,11 @@ CREATE TABLE `civicrm_mailing_recipients` (
   KEY `FK_civicrm_mailing_recipients_mailing_id` (`mailing_id`),
   KEY `FK_civicrm_mailing_recipients_contact_id` (`contact_id`),
   KEY `FK_civicrm_mailing_recipients_email_id` (`email_id`),
-  KEY `FK_civicrm_mailing_recipients_phone_id` (`phone_id`)
+  KEY `FK_civicrm_mailing_recipients_phone_id` (`phone_id`),
+  CONSTRAINT `FK_civicrm_mailing_recipients_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_mailing_recipients_email_id` FOREIGN KEY (`email_id`) REFERENCES `civicrm_email` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION,
+  CONSTRAINT `FK_civicrm_mailing_recipients_mailing_id` FOREIGN KEY (`mailing_id`) REFERENCES `civicrm_mailing` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_mailing_recipients_phone_id` FOREIGN KEY (`phone_id`) REFERENCES `civicrm_phone` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_spool`;
@@ -1800,7 +1961,8 @@ CREATE TABLE `civicrm_mailing_spool` (
   `added_at` datetime DEFAULT NULL COMMENT 'date on which this job was added.',
   `removed_at` datetime DEFAULT NULL COMMENT 'date on which this job was removed.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_spool_job_id` (`job_id`)
+  KEY `FK_civicrm_mailing_spool_job_id` (`job_id`),
+  CONSTRAINT `FK_civicrm_mailing_spool_job_id` FOREIGN KEY (`job_id`) REFERENCES `civicrm_mailing_job` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_mailing_trackable_url`;
@@ -1810,7 +1972,8 @@ CREATE TABLE `civicrm_mailing_trackable_url` (
   `url` text NOT NULL COMMENT 'The URL to be tracked.',
   `mailing_id` int(10) unsigned NOT NULL COMMENT 'FK to the mailing',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_mailing_trackable_url_mailing_id` (`mailing_id`)
+  KEY `FK_civicrm_mailing_trackable_url_mailing_id` (`mailing_id`),
+  CONSTRAINT `FK_civicrm_mailing_trackable_url_mailing_id` FOREIGN KEY (`mailing_id`) REFERENCES `civicrm_mailing` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_managed`;
@@ -1858,7 +2021,10 @@ CREATE TABLE `civicrm_mapping_field` (
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_mapping_field_mapping_id` (`mapping_id`),
   KEY `FK_civicrm_mapping_field_location_type_id` (`location_type_id`),
-  KEY `FK_civicrm_mapping_field_relationship_type_id` (`relationship_type_id`)
+  KEY `FK_civicrm_mapping_field_relationship_type_id` (`relationship_type_id`),
+  CONSTRAINT `FK_civicrm_mapping_field_location_type_id` FOREIGN KEY (`location_type_id`) REFERENCES `civicrm_location_type` (`id`),
+  CONSTRAINT `FK_civicrm_mapping_field_mapping_id` FOREIGN KEY (`mapping_id`) REFERENCES `civicrm_mapping` (`id`),
+  CONSTRAINT `FK_civicrm_mapping_field_relationship_type_id` FOREIGN KEY (`relationship_type_id`) REFERENCES `civicrm_relationship_type` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_membership`;
@@ -1885,7 +2051,13 @@ CREATE TABLE `civicrm_membership` (
   KEY `FK_civicrm_membership_membership_type_id` (`membership_type_id`),
   KEY `FK_civicrm_membership_status_id` (`status_id`),
   KEY `FK_civicrm_membership_contribution_recur_id` (`contribution_recur_id`),
-  KEY `FK_civicrm_membership_campaign_id` (`campaign_id`)
+  KEY `FK_civicrm_membership_campaign_id` (`campaign_id`),
+  CONSTRAINT `FK_civicrm_membership_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_membership_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_membership_contribution_recur_id` FOREIGN KEY (`contribution_recur_id`) REFERENCES `civicrm_contribution_recur` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_membership_membership_type_id` FOREIGN KEY (`membership_type_id`) REFERENCES `civicrm_membership_type` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_membership_owner_membership_id` FOREIGN KEY (`owner_membership_id`) REFERENCES `civicrm_membership` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_membership_status_id` FOREIGN KEY (`status_id`) REFERENCES `civicrm_membership_status` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_membership_block`;
@@ -1906,7 +2078,9 @@ CREATE TABLE `civicrm_membership_block` (
   `is_active` tinyint(4) DEFAULT 1 COMMENT 'Is this membership_block enabled',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_membership_block_entity_id` (`entity_id`),
-  KEY `FK_civicrm_membership_block_membership_type_default` (`membership_type_default`)
+  KEY `FK_civicrm_membership_block_membership_type_default` (`membership_type_default`),
+  CONSTRAINT `FK_civicrm_membership_block_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_contribution_page` (`id`),
+  CONSTRAINT `FK_civicrm_membership_block_membership_type_default` FOREIGN KEY (`membership_type_default`) REFERENCES `civicrm_membership_type` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_membership_log`;
@@ -1925,7 +2099,11 @@ CREATE TABLE `civicrm_membership_log` (
   KEY `FK_civicrm_membership_log_membership_id` (`membership_id`),
   KEY `FK_civicrm_membership_log_status_id` (`status_id`),
   KEY `FK_civicrm_membership_log_modified_id` (`modified_id`),
-  KEY `FK_civicrm_membership_log_membership_type_id` (`membership_type_id`)
+  KEY `FK_civicrm_membership_log_membership_type_id` (`membership_type_id`),
+  CONSTRAINT `FK_civicrm_membership_log_membership_id` FOREIGN KEY (`membership_id`) REFERENCES `civicrm_membership` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_membership_log_membership_type_id` FOREIGN KEY (`membership_type_id`) REFERENCES `civicrm_membership_type` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_membership_log_modified_id` FOREIGN KEY (`modified_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_membership_log_status_id` FOREIGN KEY (`status_id`) REFERENCES `civicrm_membership_status` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_membership_payment`;
@@ -1936,7 +2114,9 @@ CREATE TABLE `civicrm_membership_payment` (
   `contribution_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to contribution table.',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_contribution_membership` (`contribution_id`,`membership_id`),
-  KEY `FK_civicrm_membership_payment_membership_id` (`membership_id`)
+  KEY `FK_civicrm_membership_payment_membership_id` (`membership_id`),
+  CONSTRAINT `FK_civicrm_membership_payment_contribution_id` FOREIGN KEY (`contribution_id`) REFERENCES `civicrm_contribution` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_membership_payment_membership_id` FOREIGN KEY (`membership_id`) REFERENCES `civicrm_membership` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_membership_status`;
@@ -1988,7 +2168,10 @@ CREATE TABLE `civicrm_membership_type` (
   KEY `index_relationship_type_id` (`relationship_type_id`),
   KEY `FK_civicrm_membership_type_domain_id` (`domain_id`),
   KEY `FK_civicrm_membership_type_member_of_contact_id` (`member_of_contact_id`),
-  KEY `FK_civicrm_membership_type_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_membership_type_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_membership_type_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`),
+  CONSTRAINT `FK_civicrm_membership_type_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`),
+  CONSTRAINT `FK_civicrm_membership_type_member_of_contact_id` FOREIGN KEY (`member_of_contact_id`) REFERENCES `civicrm_contact` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_menu`;
@@ -2018,7 +2201,9 @@ CREATE TABLE `civicrm_menu` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_path_domain_id` (`path`,`domain_id`),
   KEY `FK_civicrm_menu_domain_id` (`domain_id`),
-  KEY `FK_civicrm_menu_component_id` (`component_id`)
+  KEY `FK_civicrm_menu_component_id` (`component_id`),
+  CONSTRAINT `FK_civicrm_menu_component_id` FOREIGN KEY (`component_id`) REFERENCES `civicrm_component` (`id`),
+  CONSTRAINT `FK_civicrm_menu_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_msg_template`;
@@ -2054,7 +2239,9 @@ CREATE TABLE `civicrm_navigation` (
   `weight` int(11) DEFAULT NULL COMMENT 'Ordering of the navigation items in various blocks.',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_navigation_domain_id` (`domain_id`),
-  KEY `FK_civicrm_navigation_parent_id` (`parent_id`)
+  KEY `FK_civicrm_navigation_parent_id` (`parent_id`),
+  CONSTRAINT `FK_civicrm_navigation_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`),
+  CONSTRAINT `FK_civicrm_navigation_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `civicrm_navigation` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_note`;
@@ -2070,7 +2257,8 @@ CREATE TABLE `civicrm_note` (
   `privacy` varchar(255) DEFAULT NULL COMMENT 'Foreign Key to Note Privacy Level (which is an option value pair and hence an implicit FK)',
   PRIMARY KEY (`id`),
   KEY `index_entity` (`entity_table`,`entity_id`),
-  KEY `FK_civicrm_note_contact_id` (`contact_id`)
+  KEY `FK_civicrm_note_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_note_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_openid`;
@@ -2085,7 +2273,8 @@ CREATE TABLE `civicrm_openid` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_openid` (`openid`),
   KEY `index_location_type` (`location_type_id`),
-  KEY `FK_civicrm_openid_contact_id` (`contact_id`)
+  KEY `FK_civicrm_openid_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_openid_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_option_group`;
@@ -2129,7 +2318,10 @@ CREATE TABLE `civicrm_option_value` (
   KEY `FK_civicrm_option_value_domain_id` (`domain_id`),
   KEY `index_option_group_id_value` (`value`(128),`option_group_id`),
   KEY `index_option_group_id_name` (`option_group_id`,`name`(128)),
-  KEY `civicrm_option_value_option_group_id_IDX` (`option_group_id`) USING BTREE
+  KEY `civicrm_option_value_option_group_id_IDX` (`option_group_id`) USING BTREE,
+  CONSTRAINT `FK_civicrm_option_value_component_id` FOREIGN KEY (`component_id`) REFERENCES `civicrm_component` (`id`),
+  CONSTRAINT `FK_civicrm_option_value_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`),
+  CONSTRAINT `FK_civicrm_option_value_option_group_id` FOREIGN KEY (`option_group_id`) REFERENCES `civicrm_option_group` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_participant`;
@@ -2163,7 +2355,15 @@ CREATE TABLE `civicrm_participant` (
   KEY `FK_civicrm_participant_discount_id` (`discount_id`),
   KEY `FK_civicrm_participant_campaign_id` (`campaign_id`),
   KEY `FK_civicrm_participant_cart_id` (`cart_id`),
-  KEY `FK_civicrm_participant_transferred_to_contact_id` (`transferred_to_contact_id`)
+  KEY `FK_civicrm_participant_transferred_to_contact_id` (`transferred_to_contact_id`),
+  CONSTRAINT `FK_civicrm_participant_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_participant_cart_id` FOREIGN KEY (`cart_id`) REFERENCES `civicrm_event_carts` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_participant_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_participant_discount_id` FOREIGN KEY (`discount_id`) REFERENCES `civicrm_discount` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_participant_event_id` FOREIGN KEY (`event_id`) REFERENCES `civicrm_event` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_participant_registered_by_id` FOREIGN KEY (`registered_by_id`) REFERENCES `civicrm_participant` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_participant_status_id` FOREIGN KEY (`status_id`) REFERENCES `civicrm_participant_status_type` (`id`),
+  CONSTRAINT `FK_civicrm_participant_transferred_to_contact_id` FOREIGN KEY (`transferred_to_contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_participant_payment`;
@@ -2174,7 +2374,9 @@ CREATE TABLE `civicrm_participant_payment` (
   `contribution_id` int(10) unsigned NOT NULL COMMENT 'FK to contribution table.',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_contribution_participant` (`contribution_id`,`participant_id`),
-  KEY `FK_civicrm_participant_payment_participant_id` (`participant_id`)
+  KEY `FK_civicrm_participant_payment_participant_id` (`participant_id`),
+  CONSTRAINT `FK_civicrm_participant_payment_contribution_id` FOREIGN KEY (`contribution_id`) REFERENCES `civicrm_contribution` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_participant_payment_participant_id` FOREIGN KEY (`participant_id`) REFERENCES `civicrm_participant` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_participant_status_type`;
@@ -2220,7 +2422,9 @@ CREATE TABLE `civicrm_payment_processor` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_name_test_domain_id` (`name`,`is_test`,`domain_id`),
   KEY `FK_civicrm_payment_processor_domain_id` (`domain_id`),
-  KEY `FK_civicrm_payment_processor_payment_processor_type_id` (`payment_processor_type_id`)
+  KEY `FK_civicrm_payment_processor_payment_processor_type_id` (`payment_processor_type_id`),
+  CONSTRAINT `FK_civicrm_payment_processor_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`),
+  CONSTRAINT `FK_civicrm_payment_processor_payment_processor_type_id` FOREIGN KEY (`payment_processor_type_id`) REFERENCES `civicrm_payment_processor_type` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_payment_processor_type`;
@@ -2272,7 +2476,10 @@ CREATE TABLE `civicrm_payment_token` (
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_payment_token_contact_id` (`contact_id`),
   KEY `FK_civicrm_payment_token_payment_processor_id` (`payment_processor_id`),
-  KEY `FK_civicrm_payment_token_created_id` (`created_id`)
+  KEY `FK_civicrm_payment_token_created_id` (`created_id`),
+  CONSTRAINT `FK_civicrm_payment_token_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_payment_token_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_payment_token_payment_processor_id` FOREIGN KEY (`payment_processor_id`) REFERENCES `civicrm_payment_processor` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_pcp`;
@@ -2295,7 +2502,8 @@ CREATE TABLE `civicrm_pcp` (
   `is_active` tinyint(4) DEFAULT 0 COMMENT 'Is Personal Campaign Page enabled/active?',
   `is_notify` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_pcp_contact_id` (`contact_id`)
+  KEY `FK_civicrm_pcp_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_pcp_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_pcp_block`;
@@ -2315,7 +2523,8 @@ CREATE TABLE `civicrm_pcp_block` (
   `notify_email` varchar(255) DEFAULT NULL COMMENT 'If set, notification is automatically emailed to this email-address on create/update Personal Campaign Page',
   `owner_notify_id` int(11) DEFAULT NULL COMMENT 'FK to option_value where option_group = pcp_owner_notification',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_pcp_block_supporter_profile_id` (`supporter_profile_id`)
+  KEY `FK_civicrm_pcp_block_supporter_profile_id` (`supporter_profile_id`),
+  CONSTRAINT `FK_civicrm_pcp_block_supporter_profile_id` FOREIGN KEY (`supporter_profile_id`) REFERENCES `civicrm_uf_group` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_persistent`;
@@ -2348,7 +2557,8 @@ CREATE TABLE `civicrm_phone` (
   KEY `index_is_billing` (`is_billing`),
   KEY `UI_mobile_provider_id` (`mobile_provider_id`),
   KEY `FK_civicrm_phone_contact_id` (`contact_id`),
-  KEY `phone_numeric_index` (`phone_numeric`)
+  KEY `phone_numeric_index` (`phone_numeric`),
+  CONSTRAINT `FK_civicrm_phone_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_pledge`;
@@ -2382,7 +2592,11 @@ CREATE TABLE `civicrm_pledge` (
   KEY `FK_civicrm_pledge_contact_id` (`contact_id`),
   KEY `FK_civicrm_pledge_contribution_page_id` (`contribution_page_id`),
   KEY `FK_civicrm_pledge_campaign_id` (`campaign_id`),
-  KEY `FK_civicrm_pledge_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_pledge_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_pledge_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_pledge_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_pledge_contribution_page_id` FOREIGN KEY (`contribution_page_id`) REFERENCES `civicrm_contribution_page` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_pledge_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_pledge_block`;
@@ -2419,7 +2633,9 @@ CREATE TABLE `civicrm_pledge_payment` (
   PRIMARY KEY (`id`),
   KEY `index_contribution_pledge` (`contribution_id`,`pledge_id`),
   KEY `index_status` (`status_id`),
-  KEY `FK_civicrm_pledge_payment_pledge_id` (`pledge_id`)
+  KEY `FK_civicrm_pledge_payment_pledge_id` (`pledge_id`),
+  CONSTRAINT `FK_civicrm_pledge_payment_contribution_id` FOREIGN KEY (`contribution_id`) REFERENCES `civicrm_contribution` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_pledge_payment_pledge_id` FOREIGN KEY (`pledge_id`) REFERENCES `civicrm_pledge` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_preferences_date`;
@@ -2464,7 +2680,10 @@ CREATE TABLE `civicrm_premiums_product` (
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_premiums_product_premiums_id` (`premiums_id`),
   KEY `FK_civicrm_premiums_product_product_id` (`product_id`),
-  KEY `FK_civicrm_premiums_product_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_premiums_product_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_premiums_product_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_premiums_product_premiums_id` FOREIGN KEY (`premiums_id`) REFERENCES `civicrm_premiums` (`id`),
+  CONSTRAINT `FK_civicrm_premiums_product_product_id` FOREIGN KEY (`product_id`) REFERENCES `civicrm_product` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_prevnext_cache`;
@@ -2503,7 +2722,8 @@ CREATE TABLE `civicrm_price_field` (
   `visibility_id` int(10) unsigned DEFAULT 1 COMMENT 'Implicit FK to civicrm_option_group with name = ''visibility''',
   PRIMARY KEY (`id`),
   KEY `index_name` (`name`),
-  KEY `FK_civicrm_price_field_price_set_id` (`price_set_id`)
+  KEY `FK_civicrm_price_field_price_set_id` (`price_set_id`),
+  CONSTRAINT `FK_civicrm_price_field_price_set_id` FOREIGN KEY (`price_set_id`) REFERENCES `civicrm_price_set` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_price_field_value`;
@@ -2529,7 +2749,10 @@ CREATE TABLE `civicrm_price_field_value` (
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_price_field_value_price_field_id` (`price_field_id`),
   KEY `FK_civicrm_price_field_value_membership_type_id` (`membership_type_id`),
-  KEY `FK_civicrm_price_field_value_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_price_field_value_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_price_field_value_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_price_field_value_membership_type_id` FOREIGN KEY (`membership_type_id`) REFERENCES `civicrm_membership_type` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_price_field_value_price_field_id` FOREIGN KEY (`price_field_id`) REFERENCES `civicrm_price_field` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_price_set`;
@@ -2551,7 +2774,9 @@ CREATE TABLE `civicrm_price_set` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_name` (`name`),
   KEY `FK_civicrm_price_set_domain_id` (`domain_id`),
-  KEY `FK_civicrm_price_set_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_price_set_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_price_set_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`),
+  CONSTRAINT `FK_civicrm_price_set_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_price_set_entity`;
@@ -2563,7 +2788,8 @@ CREATE TABLE `civicrm_price_set_entity` (
   `price_set_id` int(10) unsigned NOT NULL COMMENT 'price set being used',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_entity` (`entity_table`,`entity_id`),
-  KEY `FK_civicrm_price_set_entity_price_set_id` (`price_set_id`)
+  KEY `FK_civicrm_price_set_entity_price_set_id` (`price_set_id`),
+  CONSTRAINT `FK_civicrm_price_set_entity_price_set_id` FOREIGN KEY (`price_set_id`) REFERENCES `civicrm_price_set` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_print_label`;
@@ -2581,7 +2807,8 @@ CREATE TABLE `civicrm_print_label` (
   `is_reserved` tinyint(4) DEFAULT 1 COMMENT 'Is this reserved label?',
   `created_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to civicrm_contact, who created this label layout',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_print_label_created_id` (`created_id`)
+  KEY `FK_civicrm_print_label_created_id` (`created_id`),
+  CONSTRAINT `FK_civicrm_print_label_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_product`;
@@ -2607,7 +2834,8 @@ CREATE TABLE `civicrm_product` (
   `frequency_interval` int(11) DEFAULT NULL COMMENT 'Number of units for delivery frequency of subscription, service, membership (e.g. every 3 Months).',
   `financial_type_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to Financial Type.',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_product_financial_type_id` (`financial_type_id`)
+  KEY `FK_civicrm_product_financial_type_id` (`financial_type_id`),
+  CONSTRAINT `FK_civicrm_product_financial_type_id` FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_queue_item`;
@@ -2652,7 +2880,11 @@ CREATE TABLE `civicrm_relationship` (
   KEY `FK_civicrm_relationship_contact_id_a` (`contact_id_a`),
   KEY `FK_civicrm_relationship_contact_id_b` (`contact_id_b`),
   KEY `FK_civicrm_relationship_relationship_type_id` (`relationship_type_id`),
-  KEY `FK_civicrm_relationship_case_id` (`case_id`)
+  KEY `FK_civicrm_relationship_case_id` (`case_id`),
+  CONSTRAINT `FK_civicrm_relationship_case_id` FOREIGN KEY (`case_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_relationship_contact_id_a` FOREIGN KEY (`contact_id_a`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_relationship_contact_id_b` FOREIGN KEY (`contact_id_b`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_relationship_relationship_type_id` FOREIGN KEY (`relationship_type_id`) REFERENCES `civicrm_relationship_type` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_relationship_type`;
@@ -2704,7 +2936,12 @@ CREATE TABLE `civicrm_report_instance` (
   KEY `FK_civicrm_report_instance_navigation_id` (`navigation_id`),
   KEY `FK_civicrm_report_instance_drilldown_id` (`drilldown_id`),
   KEY `FK_civicrm_report_instance_created_id` (`created_id`),
-  KEY `FK_civicrm_report_instance_owner_id` (`owner_id`)
+  KEY `FK_civicrm_report_instance_owner_id` (`owner_id`),
+  CONSTRAINT `FK_civicrm_report_instance_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_report_instance_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`),
+  CONSTRAINT `FK_civicrm_report_instance_drilldown_id` FOREIGN KEY (`drilldown_id`) REFERENCES `civicrm_report_instance` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_report_instance_navigation_id` FOREIGN KEY (`navigation_id`) REFERENCES `civicrm_navigation` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_report_instance_owner_id` FOREIGN KEY (`owner_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_saved_search`;
@@ -2718,7 +2955,8 @@ CREATE TABLE `civicrm_saved_search` (
   `select_tables` text DEFAULT NULL COMMENT 'the tables to be included in a select data',
   `where_tables` text DEFAULT NULL COMMENT 'the tables to be included in the count statement',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_saved_search_mapping_id` (`mapping_id`)
+  KEY `FK_civicrm_saved_search_mapping_id` (`mapping_id`),
+  CONSTRAINT `FK_civicrm_saved_search_mapping_id` FOREIGN KEY (`mapping_id`) REFERENCES `civicrm_mapping` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_setting`;
@@ -2738,7 +2976,11 @@ CREATE TABLE `civicrm_setting` (
   KEY `FK_civicrm_setting_domain_id` (`domain_id`),
   KEY `FK_civicrm_setting_contact_id` (`contact_id`),
   KEY `FK_civicrm_setting_component_id` (`component_id`),
-  KEY `FK_civicrm_setting_created_id` (`created_id`)
+  KEY `FK_civicrm_setting_created_id` (`created_id`),
+  CONSTRAINT `FK_civicrm_setting_component_id` FOREIGN KEY (`component_id`) REFERENCES `civicrm_component` (`id`),
+  CONSTRAINT `FK_civicrm_setting_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_setting_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_setting_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_sms_provider`;
@@ -2766,7 +3008,8 @@ CREATE TABLE `civicrm_state_province` (
   `country_id` int(10) unsigned NOT NULL COMMENT 'ID of Country that State / Province belong',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_name_country_id` (`name`,`country_id`),
-  KEY `FK_civicrm_state_province_country_id` (`country_id`)
+  KEY `FK_civicrm_state_province_country_id` (`country_id`),
+  CONSTRAINT `FK_civicrm_state_province_country_id` FOREIGN KEY (`country_id`) REFERENCES `civicrm_country` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_status_pref`;
@@ -2781,7 +3024,8 @@ CREATE TABLE `civicrm_status_pref` (
   `check_info` varchar(255) DEFAULT NULL COMMENT 'These values are per-check, and can''t be compared across checks.',
   PRIMARY KEY (`id`),
   KEY `UI_status_pref_name` (`name`),
-  KEY `FK_civicrm_status_pref_domain_id` (`domain_id`)
+  KEY `FK_civicrm_status_pref_domain_id` (`domain_id`),
+  CONSTRAINT `FK_civicrm_status_pref_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_subscription_history`;
@@ -2796,7 +3040,9 @@ CREATE TABLE `civicrm_subscription_history` (
   `tracking` varchar(255) DEFAULT NULL COMMENT 'IP address or other tracking info',
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_subscription_history_contact_id` (`contact_id`),
-  KEY `FK_civicrm_subscription_history_group_id` (`group_id`)
+  KEY `FK_civicrm_subscription_history_group_id` (`group_id`),
+  CONSTRAINT `FK_civicrm_subscription_history_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_subscription_history_group_id` FOREIGN KEY (`group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_survey`;
@@ -2826,7 +3072,10 @@ CREATE TABLE `civicrm_survey` (
   KEY `UI_activity_type_id` (`activity_type_id`),
   KEY `FK_civicrm_survey_campaign_id` (`campaign_id`),
   KEY `FK_civicrm_survey_created_id` (`created_id`),
-  KEY `FK_civicrm_survey_last_modified_id` (`last_modified_id`)
+  KEY `FK_civicrm_survey_last_modified_id` (`last_modified_id`),
+  CONSTRAINT `FK_civicrm_survey_campaign_id` FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_survey_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_survey_last_modified_id` FOREIGN KEY (`last_modified_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_system_log`;
@@ -2862,7 +3111,9 @@ CREATE TABLE `civicrm_tag` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UI_name` (`name`),
   KEY `FK_civicrm_tag_parent_id` (`parent_id`),
-  KEY `FK_civicrm_tag_created_id` (`created_id`)
+  KEY `FK_civicrm_tag_created_id` (`created_id`),
+  CONSTRAINT `FK_civicrm_tag_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_tag_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `civicrm_tag` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_tell_friend`;
@@ -2891,7 +3142,8 @@ CREATE TABLE `civicrm_timezone` (
   `offset` int(11) DEFAULT NULL,
   `country_id` int(10) unsigned NOT NULL COMMENT 'Country Id',
   PRIMARY KEY (`id`),
-  KEY `FK_civicrm_timezone_country_id` (`country_id`)
+  KEY `FK_civicrm_timezone_country_id` (`country_id`),
+  CONSTRAINT `FK_civicrm_timezone_country_id` FOREIGN KEY (`country_id`) REFERENCES `civicrm_country` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_uf_field`;
@@ -2919,7 +3171,9 @@ CREATE TABLE `civicrm_uf_field` (
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_uf_field_uf_group_id` (`uf_group_id`),
   KEY `FK_civicrm_uf_field_location_type_id` (`location_type_id`),
-  KEY `IX_website_type_id` (`website_type_id`)
+  KEY `IX_website_type_id` (`website_type_id`),
+  CONSTRAINT `FK_civicrm_uf_field_location_type_id` FOREIGN KEY (`location_type_id`) REFERENCES `civicrm_location_type` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_uf_field_uf_group_id` FOREIGN KEY (`uf_group_id`) REFERENCES `civicrm_uf_group` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_uf_group`;
@@ -2951,7 +3205,10 @@ CREATE TABLE `civicrm_uf_group` (
   PRIMARY KEY (`id`),
   KEY `FK_civicrm_uf_group_limit_listings_group_id` (`limit_listings_group_id`),
   KEY `FK_civicrm_uf_group_add_to_group_id` (`add_to_group_id`),
-  KEY `FK_civicrm_uf_group_created_id` (`created_id`)
+  KEY `FK_civicrm_uf_group_created_id` (`created_id`),
+  CONSTRAINT `FK_civicrm_uf_group_add_to_group_id` FOREIGN KEY (`add_to_group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_uf_group_created_id` FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `FK_civicrm_uf_group_limit_listings_group_id` FOREIGN KEY (`limit_listings_group_id`) REFERENCES `civicrm_group` (`id`) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS `civicrm_uf_join`;
@@ -2967,7 +3224,8 @@ CREATE TABLE `civicrm_uf_join` (
   `module_data` longtext DEFAULT NULL COMMENT 'Json serialized array of data used by the ufjoin.module',
   PRIMARY KEY (`id`),
   KEY `index_entity` (`entity_table`,`entity_id`),
-  KEY `FK_civicrm_uf_join_uf_group_id` (`uf_group_id`)
+  KEY `FK_civicrm_uf_join_uf_group_id` (`uf_group_id`),
+  CONSTRAINT `FK_civicrm_uf_join_uf_group_id` FOREIGN KEY (`uf_group_id`) REFERENCES `civicrm_uf_group` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_uf_match`;
@@ -2983,7 +3241,9 @@ CREATE TABLE `civicrm_uf_match` (
   UNIQUE KEY `UI_uf_name_domain_id` (`uf_name`,`domain_id`),
   UNIQUE KEY `UI_contact_domain_id` (`contact_id`,`domain_id`),
   KEY `I_civicrm_uf_match_uf_id` (`uf_id`),
-  KEY `FK_civicrm_uf_match_domain_id` (`domain_id`)
+  KEY `FK_civicrm_uf_match_domain_id` (`domain_id`),
+  CONSTRAINT `FK_civicrm_uf_match_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_civicrm_uf_match_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_value_amaze_23`;
@@ -2994,7 +3254,8 @@ CREATE TABLE `civicrm_value_amaze_23` (
   `amaze_id_104` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_amaze_id_104` (`amaze_id_104`)
+  KEY `INDEX_amaze_id_104` (`amaze_id_104`),
+  CONSTRAINT `FK_civicrm_value_amaze_23_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_archiving_custom_data_22`;
@@ -3005,7 +3266,8 @@ CREATE TABLE `civicrm_value_archiving_custom_data_22` (
   `archiving_box_barcode_103` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_archiving_box_barcode_103` (`archiving_box_barcode_103`)
+  KEY `INDEX_archiving_box_barcode_103` (`archiving_box_barcode_103`),
+  CONSTRAINT `FK_civicrm_value_archiving_custom_d_ccc0e02f3ad61e34` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_activity` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_bioresource_sub_study_28`;
@@ -3016,7 +3278,8 @@ CREATE TABLE `civicrm_value_bioresource_sub_study_28` (
   `sub_study_118` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_sub_study_118` (`sub_study_118`)
+  KEY `INDEX_sub_study_118` (`sub_study_118`),
+  CONSTRAINT `FK_civicrm_value_bioresource_sub_st_156f67e6f2fdbd55` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_brave_16`;
@@ -3033,7 +3296,8 @@ CREATE TABLE `civicrm_value_brave_16` (
   KEY `INDEX_brave_id_74` (`brave_id_74`),
   KEY `INDEX_brave_source_study_75` (`brave_source_study_75`),
   KEY `INDEX_briccs_id_86` (`briccs_id_86`),
-  KEY `INDEX_brave_family_id_87` (`brave_family_id_87`)
+  KEY `INDEX_brave_family_id_87` (`brave_family_id_87`),
+  CONSTRAINT `FK_civicrm_value_brave_16_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_briccs_recruitment_data_10`;
@@ -3064,7 +3328,8 @@ CREATE TABLE `civicrm_value_briccs_recruitment_data_10` (
   KEY `INDEX_interview_status_34` (`interview_status_34`),
   KEY `INDEX_interviewer_33` (`interviewer_33`),
   KEY `INDEX_recruitment_type_40` (`recruitment_type_40`),
-  KEY `INDEX_invitation_for__116` (`invitation_for__116`)
+  KEY `INDEX_invitation_for__116` (`invitation_for__116`),
+  CONSTRAINT `FK_civicrm_value_briccs_recruitment_5e87b98ba57aa616` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_cardiomet_31`;
@@ -3075,7 +3340,8 @@ CREATE TABLE `civicrm_value_cardiomet_31` (
   `cardiomet_id_123` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_cardiomet_id_123` (`cardiomet_id_123`)
+  KEY `INDEX_cardiomet_id_123` (`cardiomet_id_123`),
+  CONSTRAINT `FK_civicrm_value_cardiomet_31_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_ccg_data_14`;
@@ -3090,7 +3356,8 @@ CREATE TABLE `civicrm_value_ccg_data_14` (
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `INDEX_ccg_code_52` (`ccg_code_52`),
   KEY `INDEX_genvasc_principal_investigator_56` (`genvasc_principal_investigator_56`),
-  KEY `INDEX_clrn_site_id_57` (`clrn_site_id_57`)
+  KEY `INDEX_clrn_site_id_57` (`clrn_site_id_57`),
+  CONSTRAINT `FK_civicrm_value_ccg_data_14_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_contact_ids_1`;
@@ -3103,7 +3370,8 @@ CREATE TABLE `civicrm_value_contact_ids_1` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `dedupe_index_nhs_number_1` (`nhs_number_1`),
-  KEY `dedupe_index_uhl_s_number_2` (`uhl_s_number_2`)
+  KEY `dedupe_index_uhl_s_number_2` (`uhl_s_number_2`),
+  CONSTRAINT `FK_civicrm_value_contact_ids_1_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_discordance_36`;
@@ -3114,7 +3382,8 @@ CREATE TABLE `civicrm_value_discordance_36` (
   `discordance_id_130` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_discordance_id_130` (`discordance_id_130`)
+  KEY `INDEX_discordance_id_130` (`discordance_id_130`),
+  CONSTRAINT `FK_civicrm_value_discordance_36_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_dream_recruitment_data_6`;
@@ -3128,7 +3397,8 @@ CREATE TABLE `civicrm_value_dream_recruitment_data_6` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `INDEX_dream_study_id_18` (`dream_study_id_18`),
-  KEY `INDEX_consent_to_store_dream_study_sam_20` (`consent_to_store_dream_study_sam_20`)
+  KEY `INDEX_consent_to_store_dream_study_sam_20` (`consent_to_store_dream_study_sam_20`),
+  CONSTRAINT `FK_civicrm_value_dream_recruitment__f9c156dfc966dcb4` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_emmace_4_recruitment_data_13`;
@@ -3139,8 +3409,9 @@ CREATE TABLE `civicrm_value_emmace_4_recruitment_data_13` (
   `emmace_4_id_50` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_emmace_4_id_50` (`emmace_4_id_50`)
- );
+  KEY `INDEX_emmace_4_id_50` (`emmace_4_id_50`),
+  CONSTRAINT `FK_civicrm_value_emmace_4_recruitme_f04b4c174d7753d4` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
+);
 
 DROP TABLE IF EXISTS `civicrm_value_fast_24`;
 
@@ -3150,7 +3421,8 @@ CREATE TABLE `civicrm_value_fast_24` (
   `fast_id_106` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_fast_id_106` (`fast_id_106`)
+  KEY `INDEX_fast_id_106` (`fast_id_106`),
+  CONSTRAINT `FK_civicrm_value_fast_24_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_foami_27`;
@@ -3161,7 +3433,8 @@ CREATE TABLE `civicrm_value_foami_27` (
   `foami_id_117` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_foami_id_117` (`foami_id_117`)
+  KEY `INDEX_foami_id_117` (`foami_id_117`),
+  CONSTRAINT `FK_civicrm_value_foami_27_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_genvasc_invoice_data_25`;
@@ -3181,7 +3454,8 @@ CREATE TABLE `civicrm_value_genvasc_invoice_data_25` (
   KEY `INDEX_invoice_quarter_108` (`invoice_quarter_108`),
   KEY `INDEX_processed_by_110` (`processed_by_110`),
   KEY `INDEX_processed_date_111` (`processed_date_111`),
-  KEY `INDEX_reimbursed_status_114` (`reimbursed_status_114`)
+  KEY `INDEX_reimbursed_status_114` (`reimbursed_status_114`),
+  CONSTRAINT `FK_civicrm_value_genvasc_invoice_data_25_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_genvasc_invoice_data_save`;
@@ -3228,7 +3502,8 @@ CREATE TABLE `civicrm_value_genvasc_recruitment_data_5` (
   KEY `INDEX_genvasc_consent_q5_15` (`genvasc_consent_q5_15`),
   KEY `INDEX_genvasc_consent_q6_16` (`genvasc_consent_q6_16`),
   KEY `INDEX_genvasc_post_code_51` (`genvasc_post_code_51`),
-  KEY `idx_civicrm_value_genvasc_recruitment_data_5_genvasc_id_10` (`genvasc_id_10`)
+  KEY `idx_civicrm_value_genvasc_recruitment_data_5_genvasc_id_10` (`genvasc_id_10`),
+  CONSTRAINT `FK_civicrm_value_genvasc_recruitmen_d75481f3aad98ea9` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_genvasc_site_management_19`;
@@ -3241,7 +3516,8 @@ CREATE TABLE `civicrm_value_genvasc_site_management_19` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `INDEX_research_site_initiative_92` (`research_site_initiative_92`),
-  KEY `INDEX_it_system_93` (`it_system_93`)
+  KEY `INDEX_it_system_93` (`it_system_93`),
+  CONSTRAINT `FK_civicrm_value_genvasc_site_manag_34d1234b77df324e` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_genvasc_withdrawal_status_8`;
@@ -3252,8 +3528,9 @@ CREATE TABLE `civicrm_value_genvasc_withdrawal_status_8` (
   `withdrawal_status_24` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_withdrawal_status_24` (`withdrawal_status_24`)
- );
+  KEY `INDEX_withdrawal_status_24` (`withdrawal_status_24`),
+  CONSTRAINT `FK_civicrm_value_genvasc_withdrawal_b6ee479fe8df475a` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
+);
 
 DROP TABLE IF EXISTS `civicrm_value_global_leaders_17`;
 
@@ -3265,7 +3542,8 @@ CREATE TABLE `civicrm_value_global_leaders_17` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `INDEX_global_leaders_id_76` (`global_leaders_id_76`),
-  KEY `INDEX_treatment_arm_77` (`treatment_arm_77`)
+  KEY `INDEX_treatment_arm_77` (`treatment_arm_77`),
+  CONSTRAINT `FK_civicrm_value_global_leaders_17_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_gp_site_based_data_4`;
@@ -3278,7 +3556,8 @@ CREATE TABLE `civicrm_value_gp_site_based_data_4` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `INDEX_practice_branch_code_54` (`practice_branch_code_54`),
-  KEY `INDEX_practice_ice_code_8` (`practice_ice_code_8`)
+  KEY `INDEX_practice_ice_code_8` (`practice_ice_code_8`),
+  CONSTRAINT `FK_civicrm_value_gp_site_based_data_4_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_address` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_gp_surgery_data_3`;
@@ -3292,7 +3571,8 @@ CREATE TABLE `civicrm_value_gp_surgery_data_3` (
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `INDEX_practice_code_7` (`practice_code_7`),
   KEY `INDEX_practice_status_53` (`practice_status_53`),
-  KEY `dedupe_index_practice_code_7` (`practice_code_7`)
+  KEY `dedupe_index_practice_code_7` (`practice_code_7`),
+  CONSTRAINT `FK_civicrm_value_gp_surgery_data_3_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_graphic2_9`;
@@ -3313,7 +3593,8 @@ CREATE TABLE `civicrm_value_graphic2_9` (
   KEY `INDEX_consent_for_further_studies_28` (`consent_for_further_studies_28`),
   KEY `INDEX_g1_blood_consent_29` (`g1_blood_consent_29`),
   KEY `INDEX_pre_consent_to_graphic_2_30` (`pre_consent_to_graphic_2_30`),
-  KEY `INDEX_graphic_participant_id_26` (`graphic_participant_id_26`)
+  KEY `INDEX_graphic_participant_id_26` (`graphic_participant_id_26`),
+  CONSTRAINT `FK_civicrm_value_graphic2_9_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_health_worker_data_2`;
@@ -3328,7 +3609,8 @@ CREATE TABLE `civicrm_value_health_worker_data_2` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `INDEX_gp_practitioner_code_4` (`gp_practitioner_code_4`),
-  KEY `dedupe_index_gp_practitioner_code_4` (`gp_practitioner_code_4`)
+  KEY `dedupe_index_gp_practitioner_code_4` (`gp_practitioner_code_4`),
+  CONSTRAINT `FK_civicrm_value_health_worker_data_2_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_indapamide_26`;
@@ -3339,7 +3621,8 @@ CREATE TABLE `civicrm_value_indapamide_26` (
   `indapamide_id_112` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_indapamide_id_112` (`indapamide_id_112`)
+  KEY `INDEX_indapamide_id_112` (`indapamide_id_112`),
+  CONSTRAINT `FK_civicrm_value_indapamide_26_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_interval_data_21`;
@@ -3356,7 +3639,8 @@ CREATE TABLE `civicrm_value_interval_data_21` (
   KEY `INDEX_interval_id_98` (`interval_id_98`),
   KEY `INDEX_consent_date_99` (`consent_date_99`),
   KEY `INDEX_consent_version_100` (`consent_version_100`),
-  KEY `INDEX_consent_leaflet_101` (`consent_leaflet_101`)
+  KEY `INDEX_consent_leaflet_101` (`consent_leaflet_101`),
+  CONSTRAINT `FK_civicrm_value_interval_data_21_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_lenten_29`;
@@ -3367,7 +3651,8 @@ CREATE TABLE `civicrm_value_lenten_29` (
   `lenten_id_119` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_lenten_id_119` (`lenten_id_119`)
+  KEY `INDEX_lenten_id_119` (`lenten_id_119`),
+  CONSTRAINT `FK_civicrm_value_lenten_29_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_limb_35`;
@@ -3378,7 +3663,8 @@ CREATE TABLE `civicrm_value_limb_35` (
   `limb_id_129` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_limb_id_129` (`limb_id_129`)
+  KEY `INDEX_limb_id_129` (`limb_id_129`),
+  CONSTRAINT `FK_civicrm_value_limb_35_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_national_bioresource_34`;
@@ -3393,7 +3679,8 @@ CREATE TABLE `civicrm_value_national_bioresource_34` (
   UNIQUE KEY `unique_entity_id` (`entity_id`),
   KEY `INDEX_national_bioresource_id_126` (`national_bioresource_id_126`),
   KEY `INDEX_leicester_bioresource_id_127` (`leicester_bioresource_id_127`),
-  KEY `INDEX_legacy_bioresource_id_128` (`legacy_bioresource_id_128`)
+  KEY `INDEX_legacy_bioresource_id_128` (`legacy_bioresource_id_128`),
+  CONSTRAINT `FK_civicrm_value_national_bioresource_34_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_next_of_kin_data_7`;
@@ -3405,7 +3692,8 @@ CREATE TABLE `civicrm_value_next_of_kin_data_7` (
   `next_of_kin__relationship_22` varchar(255) DEFAULT NULL,
   `next_of_kin__telephone_number_23` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_entity_id` (`entity_id`)
+  UNIQUE KEY `unique_entity_id` (`entity_id`),
+  CONSTRAINT `FK_civicrm_value_next_of_kin_data_7_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_nihr_bioresource_11`;
@@ -3432,7 +3720,8 @@ CREATE TABLE `civicrm_value_nihr_bioresource_11` (
   KEY `INDEX_nihr_bioresource_consent_q5_47` (`nihr_bioresource_consent_q5_47`),
   KEY `INDEX_nihr_bioresource_consent_q6_48` (`nihr_bioresource_consent_q6_48`),
   KEY `INDEX_nihr_bioresource_id_41` (`nihr_bioresource_id_41`),
-  KEY `INDEX_nihr_bioresource_legacy_id_78` (`nihr_bioresource_legacy_id_78`)
+  KEY `INDEX_nihr_bioresource_legacy_id_78` (`nihr_bioresource_legacy_id_78`),
+  CONSTRAINT `FK_civicrm_value_nihr_bioresource_11_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_nihr_bioresource_withdrawal_12`;
@@ -3443,7 +3732,8 @@ CREATE TABLE `civicrm_value_nihr_bioresource_withdrawal_12` (
   `nihr_bioresource_withdrawal_stat_49` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_nihr_bioresource_withdrawal_stat_49` (`nihr_bioresource_withdrawal_stat_49`)
+  KEY `INDEX_nihr_bioresource_withdrawal_stat_49` (`nihr_bioresource_withdrawal_stat_49`),
+  CONSTRAINT `FK_civicrm_value_nihr_bioresource_w_a8cfd265331a344b` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_omics_register_20`;
@@ -3462,7 +3752,8 @@ CREATE TABLE `civicrm_value_omics_register_20` (
   KEY `INDEX_sample_source_study_95` (`sample_source_study_95`),
   KEY `INDEX_failed_qc_96` (`failed_qc_96`),
   KEY `INDEX_date_data_received_97` (`date_data_received_97`),
-  KEY `INDEX_omics_id_102` (`omics_id_102`)
+  KEY `INDEX_omics_id_102` (`omics_id_102`),
+  CONSTRAINT `FK_civicrm_value_omics_register_20_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_predict_30`;
@@ -3473,7 +3764,8 @@ CREATE TABLE `civicrm_value_predict_30` (
   `predict_id_121` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_predict_id_121` (`predict_id_121`)
+  KEY `INDEX_predict_id_121` (`predict_id_121`),
+  CONSTRAINT `FK_civicrm_value_predict_30_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_preeclampsia_33`;
@@ -3484,7 +3776,8 @@ CREATE TABLE `civicrm_value_preeclampsia_33` (
   `preeclampsia_id_125` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_preeclampsia_id_125` (`preeclampsia_id_125`)
+  KEY `INDEX_preeclampsia_id_125` (`preeclampsia_id_125`),
+  CONSTRAINT `FK_civicrm_value_preeclampsia_33_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_scad_15`;
@@ -3539,7 +3832,8 @@ CREATE TABLE `civicrm_value_scad_15` (
   KEY `INDEX_recruitment_type_91` (`recruitment_type_91`),
   KEY `INDEX_2nd_scad_survey_id_105` (`2nd_scad_survey_id_105`),
   KEY `INDEX_scad_registry_id_120` (`scad_registry_id_120`),
-  KEY `INDEX_family_id_122` (`family_id_122`)
+  KEY `INDEX_family_id_122` (`family_id_122`),
+  CONSTRAINT `FK_civicrm_value_scad_15_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_scad_register_37`;
@@ -3550,7 +3844,8 @@ CREATE TABLE `civicrm_value_scad_register_37` (
   `scad_registry_id_131` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_scad_registry_id_131` (`scad_registry_id_131`)
+  KEY `INDEX_scad_registry_id_131` (`scad_registry_id_131`),
+  CONSTRAINT `FK_civicrm_value_scad_register_37_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_spiral_32`;
@@ -3561,7 +3856,8 @@ CREATE TABLE `civicrm_value_spiral_32` (
   `spiral_id_124` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_id` (`entity_id`),
-  KEY `INDEX_spiral_id_124` (`spiral_id_124`)
+  KEY `INDEX_spiral_id_124` (`spiral_id_124`),
+  CONSTRAINT `FK_civicrm_value_spiral_32_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_value_tmao_18`;
@@ -3584,7 +3880,8 @@ CREATE TABLE `civicrm_value_tmao_18` (
   KEY `INDEX_tmao_consent_permission_to_acces_82` (`tmao_consent_permission_to_acces_82`),
   KEY `INDEX_tmao_consent_gp_informed_83` (`tmao_consent_gp_informed_83`),
   KEY `INDEX_tmao_consent_to_enrol_84` (`tmao_consent_to_enrol_84`),
-  KEY `INDEX_tmao_consent_to_store_blood_85` (`tmao_consent_to_store_blood_85`)
+  KEY `INDEX_tmao_consent_to_store_blood_85` (`tmao_consent_to_store_blood_85`),
+  CONSTRAINT `FK_civicrm_value_tmao_18_entity_id` FOREIGN KEY (`entity_id`) REFERENCES `civicrm_case` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_website`;
@@ -3596,7 +3893,8 @@ CREATE TABLE `civicrm_website` (
   `website_type_id` int(10) unsigned DEFAULT NULL COMMENT 'Which Website type does this website belong to.',
   PRIMARY KEY (`id`),
   KEY `UI_website_type_id` (`website_type_id`),
-  KEY `FK_civicrm_website_contact_id` (`contact_id`)
+  KEY `FK_civicrm_website_contact_id` (`contact_id`),
+  CONSTRAINT `FK_civicrm_website_contact_id` FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact` (`id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `civicrm_word_replacement`;
@@ -3609,7 +3907,8 @@ CREATE TABLE `civicrm_word_replacement` (
   `match_type` varchar(16) DEFAULT 'wildcardMatch',
   `domain_id` int(10) unsigned DEFAULT NULL COMMENT 'FK to Domain ID. This is for Domain specific word replacement',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UI_domain_find` (`domain_id`,`find_word`)
+  UNIQUE KEY `UI_domain_find` (`domain_id`,`find_word`),
+  CONSTRAINT `FK_civicrm_word_replacement_domain_id` FOREIGN KEY (`domain_id`) REFERENCES `civicrm_domain` (`id`)
 );
 
 DROP TABLE IF EXISTS `civicrm_worldregion`;
