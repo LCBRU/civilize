@@ -5,3 +5,4 @@ sqlalchemy
 pymysql
 flask-security-too[fsqla,common]
 cachetools
+faker

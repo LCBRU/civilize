@@ -43,6 +43,8 @@ email-validator==2.1.1
     #   lbrc-flask
 et-xmlfile==1.1.0
     # via openpyxl
+faker==25.2.0
+    # via -r requirements.in
 flask==3.0.3
     # via
     #   -r requirements.in
@@ -138,7 +140,9 @@ pymysql==1.1.1
 pyphen==0.15.0
     # via weasyprint
 python-dateutil==2.9.0.post0
-    # via arrow
+    # via
+    #   arrow
+    #   faker
 python-dotenv==1.0.1
     # via
     #   -r requirements.in
