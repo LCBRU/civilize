@@ -1,15 +1,18 @@
 from flask import render_template
 
 from lbrc_flask.database import db
+from sqlalchemy import select
+
+from civilize.model import CaseType
 
 from .. import blueprint
 
 
 @blueprint.route("/")
 def index():
-    return render_template("ui/home.html")
+    q = select(CaseType).where(CaseType.is_active == 1)
 
-
-@blueprint.route("/form")
-def form():
-    return render_template("ui/form.html")
+    return render_template(
+        "ui/home.html",
+        case_types=db.session.execute(q).scalars(),
+    )

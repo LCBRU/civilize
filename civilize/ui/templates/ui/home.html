@@ -2,5 +2,23 @@
 
 {% block menu_page_content %}
 <div class="container">
+
+    <table>
+        <thead>
+            <tr>
+                <th>Case Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ct in case_types %}
+                <tr>
+                    <td>{{ct.name}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </ul>
+  
+
 </div>
 {% endblock %}
