@@ -1,0 +1,24 @@
+{% extends "ui/menu_page.html" %}
+
+{% block menu_page_content %}
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Study</th>
+                <th>Recruited Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in cases | sort(attribute="start_date") %}
+                <tr>
+                    <td>{{c.subject}}</td>
+                    <td>{{c.case_type.name}}</td>
+                    <td>{{c.start_date | date_format}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

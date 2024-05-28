@@ -2,23 +2,21 @@
 
 {% block menu_page_content %}
 <div class="container">
-
     <table>
         <thead>
             <tr>
-                <th>Case Type</th>
+                <th>Study</th>
+                <th>Participants</th>
             </tr>
         </thead>
         <tbody>
-            {% for ct in case_types %}
+            {% for ct in case_types | sort(attribute="name") %}
                 <tr>
                     <td>{{ct.name}}</td>
+                    <td>{{ct.cases | length}}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-    </ul>
-  
-
 </div>
 {% endblock %}

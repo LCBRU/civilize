@@ -1,5 +1,5 @@
 from lbrc_flask.database import db
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 from sqlalchemy import Boolean, Integer, String, Date
 from datetime import date
 
@@ -29,4 +29,5 @@ class Case(db.Model):
         CaseType,
         foreign_keys=[case_type_id],
         primaryjoin='CaseType.id == Case.case_type_id',
+        backref=backref("cases", cascade="delete, delete-orphan")
     )
